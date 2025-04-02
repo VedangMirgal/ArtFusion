@@ -144,76 +144,76 @@ async def style_transfer(content_image: UploadFile = File(...), style_image: Upl
     except Exception as e:
         return {"error": str(e)}
     
-# STYLE_MODEL_URL = "https://tfhub.dev/google/magenta/arbitrary-image-stylization-v1-256/2"
-# hub_module = hub.load(STYLE_MODEL_URL)
-# def apply_style_transfer(frame, style_image):
-#     """Applies style transfer on a single frame."""
-#     image_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-#     style_rgb = cv2.cvtColor(style_image, cv2.COLOR_BGR2RGB)
+STYLE_MODEL_URL = "https://tfhub.dev/google/magenta/arbitrary-image-stylization-v1-256/2"
+hub_module = hub.load(STYLE_MODEL_URL)
+def apply_style_transfer(frame, style_image):
+    """Applies style transfer on a single frame."""
+    image_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    style_rgb = cv2.cvtColor(style_image, cv2.COLOR_BGR2RGB)
 
-#     # Resize and normalize images
-#     resized_frame = cv2.resize(image_rgb, (256, 256)).astype(np.float32) / 255.0
-#     resized_style = cv2.resize(style_rgb, (256, 256)).astype(np.float32) / 255.0
+    # Resize and normalize images
+    resized_frame = cv2.resize(image_rgb, (256, 256)).astype(np.float32) / 255.0
+    resized_style = cv2.resize(style_rgb, (256, 256)).astype(np.float32) / 255.0
 
-#     # Convert to TensorFlow tensors
-#     content_tensor = tf.convert_to_tensor([resized_frame], dtype=tf.float32)
-#     style_tensor = tf.convert_to_tensor([resized_style], dtype=tf.float32)
+    # Convert to TensorFlow tensors
+    content_tensor = tf.convert_to_tensor([resized_frame], dtype=tf.float32)
+    style_tensor = tf.convert_to_tensor([resized_style], dtype=tf.float32)
 
-#     # Apply style transfer
-#     outputs = hub_module(content_tensor, style_tensor)
-#     stylized_image = outputs[0].numpy()[0]
+    # Apply style transfer
+    outputs = hub_module(content_tensor, style_tensor)
+    stylized_image = outputs[0].numpy()[0]
     
-#     return cv2.cvtColor((stylized_image * 255).astype(np.uint8), cv2.COLOR_RGB2BGR)
+    return cv2.cvtColor((stylized_image * 255).astype(np.uint8), cv2.COLOR_RGB2BGR)
 
-# def process_video(video_path, style_image_path, output_path):
-#     """Processes video and applies style transfer frame by frame."""
-#     cap = cv2.VideoCapture(video_path)
-#     style_image = cv2.imread(style_image_path)
+def process_video(video_path, style_image_path, output_path):
+    """Processes video and applies style transfer frame by frame."""
+    cap = cv2.VideoCapture(video_path)
+    style_image = cv2.imread(style_image_path)
     
-#     frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-#     frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-#     fps = int(cap.get(cv2.CAP_PROP_FPS))
+    frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    fps = int(cap.get(cv2.CAP_PROP_FPS))
     
-#     out = cv2.VideoWriter(output_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (256, 256))
+    out = cv2.VideoWriter(output_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (256, 256))
     
-#     counter = 0
-#     while cap.isOpened():
-#         ret, frame = cap.read()
-#         if not ret:
-#             break
+    counter = 0
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
         
-#         print(f"Processing Frame: {counter}")
-#         stylized_frame = apply_style_transfer(frame, style_image)
-#         out.write(stylized_frame)
-#         counter += 1
+        print(f"Processing Frame: {counter}")
+        stylized_frame = apply_style_transfer(frame, style_image)
+        out.write(stylized_frame)
+        counter += 1
     
-#     cap.release()
-#     out.release()
-#     return output_path
-# @app.post("/video-style-transfer/")
-# async def upload_files(content_video: UploadFile = File(...), style_image: UploadFile = File(...)):
-#     """Endpoint to receive video and style image from the frontend and return the processed video."""
+    cap.release()
+    out.release()
+    return output_path
+@app.post("/video-style-transfer/")
+async def upload_files(content_video: UploadFile = File(...), style_image: UploadFile = File(...)):
+    """Endpoint to receive video and style image from the frontend and return the processed video."""
 
-#     with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as video_temp, \
-#          tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as style_temp:
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as video_temp, \
+         tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as style_temp:
         
-#         video_path = video_temp.name
-#         style_image_path = style_temp.name
+        video_path = video_temp.name
+        style_image_path = style_temp.name
 
-#     # Save uploaded files temporarily
-#     with open(video_path, "wb") as buffer:
-#         shutil.copyfileobj(content_video.file, buffer)
+    # Save uploaded files temporarily
+    with open(video_path, "wb") as buffer:
+        shutil.copyfileobj(content_video.file, buffer)
 
-#     with open(style_image_path, "wb") as buffer:
-#         shutil.copyfileobj(style_image.file, buffer)
+    with open(style_image_path, "wb") as buffer:
+        shutil.copyfileobj(style_image.file, buffer)
 
-#     # Process the video
-#     output_path = "styled_output.mp4"
-#     processed_video = process_video(video_path, style_image_path, output_path)
+    # Process the video
+    output_path = "styled_output.mp4"
+    processed_video = process_video(video_path, style_image_path, output_path)
 
-#     # Delete temporary files
-#     os.remove(video_path)
-#     os.remove(style_image_path)
+    # Delete temporary files
+    os.remove(video_path)
+    os.remove(style_image_path)
 
-#     # Send back the generated video
-#     return FileResponse(processed_video, media_type="video/mp4", filename="styled_output.mp4")
+    # Send back the generated video
+    return FileResponse(processed_video, media_type="video/mp4", filename="styled_output.mp4")
